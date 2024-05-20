@@ -1,12 +1,12 @@
-#include <esp_sleep.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include <DHT.h>
-#include <DHT_U.h>
+#include <esp_sleep.h>     // we use this to activate ESP32 Deep Sleep
+#include <WiFi.h>          // used by PubSubClient library
+#include <PubSubClient.h>  //library that allow us to connect to a broker , publish and suscribe to a MQTT topic over the network
+#include <DHT.h>           //Allow us to read data from Temperature/Humidity DHT 22  (AM2302), AM2321 sensor
+#include <DHT_U.h>         //Allow us to read data from Temperature/Humidity DHT 22  (AM2302), AM2321 sensor
 #include <iostream>
 #include <string>
-#include <ArduinoJson.h>
-#include <cmath>
+#include <ArduinoJson.h>   // help us to "serialize" variables in to a JSON format.
+#include <cmath>           // i have used this to round float variables to 2 digits float
 using namespace std;
 
 
@@ -25,13 +25,11 @@ const char *ssid = "Marcano"; // Enter your WiFi name
 const char *password = "neutrino";  // Enter WiFi password
 
 // MQTT Broker
-const char *mqtt_broker = "192.168.1.15";
-char *topic = "esp32";
-const char *mqtt_username = "";
-const char *mqtt_password = "";
-const int mqtt_port = 1883;
-// led blink
-
+const char *mqtt_broker = "192.168.1.15";     // MQTT broker IP
+const char *topic = "esp32";                  //this is the MQTT main topic, you can change it.
+const char *mqtt_username = "";               // use your MQTT broker uername or leave "" if there is no one.
+const char *mqtt_password = "";               // use your MQTT broker password or leave "" if there is no one.
+const int mqtt_port = 1883;                   //MQTT broker port, usually 1883.
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -59,11 +57,11 @@ void build_publish_json(float h,float t,float f,float hic,float hif){
   doc["temphif"]=round(hif * 100.0) / 100.0;
 
   int L=serializeJson(doc,out);
-  Serial.print("Longitud de la serialización:\n");
+  Serial.print("String lenght:\n");
   Serial.print(L);
-  Serial.print("\nJson a enviar:\n");
+  Serial.print("\nJson to send:\n");
   Serial.print(out);
-  Serial.print("\nPublicando ..\n");
+  Serial.print("\nOk let publish ..\n");
   client.publish("esp32", out,L);
 }
 
@@ -103,7 +101,7 @@ void read_dht(){
   Serial.println(F("°F"));
   digitalWrite (2, LOW);
   
-  build_publish_json(h,t,f,hic,hif);
+  build_publish_json(h,t,f,hic,hif);  //call to function that build JSON with our sensor data.
 
 
 }
@@ -145,14 +143,14 @@ void setup() {
  
  
  dht.begin();
- read_dht();
+ read_dht();                           // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
  delay(10000);
  Serial.print(client.state());
  Serial.end();
  client.disconnect();
  WiFi.disconnect();
- delay(5000);
- esp_deep_sleep(600 * 1000000); 
+ delay(5000);                          // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
+ esp_deep_sleep(600 * 1000000);   
 }
 
 
