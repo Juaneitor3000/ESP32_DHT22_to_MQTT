@@ -19,6 +19,8 @@ using namespace std;
 
 DHT dht(DHTPIN, DHTTYPE);
 
+// Deep Sleep Time
+#define DEEP_SLEEP_TIME 300  //Deep sleep time [Seconds]
 
 // WiFi
 const char *ssid = "Marcano"; // Enter your WiFi name
@@ -34,6 +36,9 @@ const int mqtt_port = 1883;                   //MQTT broker port, usually 1883.
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+
+// 
+//  This function callback is used when you suscribe to a topic, not the case here, we dont use it, i just publish data and the we put uC to sleep to save battery
 void callback(char *topic, byte *payload, unsigned int length) {
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
@@ -144,13 +149,13 @@ void setup() {
  
  dht.begin();
  read_dht();                           // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
- delay(10000);
+ delay(10000);                         // time added after dht reading
  Serial.print(client.state());
  Serial.end();
  client.disconnect();
  WiFi.disconnect();
  delay(5000);                          // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
- esp_deep_sleep(600 * 1000000);   
+ esp_deep_sleep(DEEP_SLEEP_TIME * 1000000);   
 }
 
 
