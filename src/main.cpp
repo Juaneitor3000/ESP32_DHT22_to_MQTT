@@ -10,24 +10,25 @@
 using namespace std;
 
 
+
+// DHT22 pin configuration
+
 // Uncomment whatever type you're using!
 //#define DHTTYPE DHT11   // DHT 11
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-#define DHTPIN 16     //pin where you will connect data pin  DHT sensor
-#define DHT_SUPPLY 17   //This pin will supply the dth 22. It will not be ON all time.
-
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
-
+#define DHTPIN 16     //pin where you will connect data pin  DHT sensor
+#define DHT_SUPPLY 17   //This pin will supply power directly to  dth 22. It will not be ON all time.
 DHT dht(DHTPIN, DHTTYPE);
 
 // Deep Sleep Time
 long DEEP_SLEEP_TIME_SEC = 600;  //Deep sleep time [Seconds]
 
-// WiFi
+// WiFi network configuration
 const char *ssid = "Marcano"; // Enter your WiFi name
 const char *password = "neutrino";  // Enter WiFi password
 
-// MQTT Broker
+// MQTT Broker configuration
 const char *mqtt_broker = "192.168.1.15";     // MQTT broker IP
 const char *topic = "esp32";                  //this is the MQTT main topic, you can change it.
 const char *mqtt_username = "";               // use your MQTT broker uername or leave "" if there is no one.
