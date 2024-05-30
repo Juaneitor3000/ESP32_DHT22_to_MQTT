@@ -151,12 +151,15 @@ void setup() {
  dht.begin();
  digitalWrite (DHT_SUPPLY, HIGH);
  read_dht();                           // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
- delay(1000);                         // time added after dht reading 
+ delay(50);                           // time added after dht reading, if uart is not empty it will not enter deep sleep mode 
  Serial.print(client.state());
  Serial.end();
  client.disconnect();
  WiFi.disconnect();
  digitalWrite (DHT_SUPPLY, LOW);       // Turn off dht22
+ digitalWrite (2, HIGH);;
+ delay(50);
+ digitalWrite (2, LOW);
  esp_deep_sleep(DEEP_SLEEP_TIME * 1000000);   
 }
 
