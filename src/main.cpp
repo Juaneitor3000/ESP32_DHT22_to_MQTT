@@ -14,13 +14,14 @@ using namespace std;
 //#define DHTTYPE DHT11   // DHT 11
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 #define DHTPIN 16     //pin where you will connect data pin  DHT sensor
+#define DHT_SUPPLY 17   //This pin will supply the dth 22. It will not be ON all time.
 
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
 DHT dht(DHTPIN, DHTTYPE);
 
 // Deep Sleep Time
-#define DEEP_SLEEP_TIME 300  //Deep sleep time [Seconds]
+#define DEEP_SLEEP_TIME 1800  //Deep sleep time [Seconds]
 
 // WiFi
 const char *ssid = "Marcano"; // Enter your WiFi name
@@ -35,7 +36,6 @@ const int mqtt_port = 1883;                   //MQTT broker port, usually 1883.
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
 
 // 
 //  This function callback is used when you suscribe to a topic, not the case here, we dont use it, i just publish data and the we put uC to sleep to save battery
@@ -66,7 +66,7 @@ void build_publish_json(float h,float t,float f,float hic,float hif){
   Serial.print(L);
   Serial.print("\nJson to send:\n");
   Serial.print(out);
-  Serial.print("\nOk let publish ..\n");
+  Serial.print("\nOk lets publish ..\n");
   client.publish("esp32", out,L);
 }
 
@@ -108,24 +108,26 @@ void read_dht(){
   
   build_publish_json(h,t,f,hic,hif);  //call to function that build JSON with our sensor data.
 
-
 }
 
 void setup() {
-
- 
- //led blink
+ //pin to power_supply dht 22 
+ pinMode (DHT_SUPPLY, OUTPUT);    
+//led blink
  pinMode (2, OUTPUT);
  // Set software serial baud to 115200;
  Serial.begin(115200);
  // connecting to a WiFi network
  WiFi.begin(ssid, password);
  while (WiFi.status() != WL_CONNECTED) {
-     delay(500);
-     Serial.println("Connecting to WiFi..");
+    digitalWrite (2, HIGH);;
+    delay(250);
+    digitalWrite (2, LOW);
+    delay(250);
+    Serial.println("Connecting to WiFi..");
  }
  Serial.println("Connected to the WiFi network");
- 
+ digitalWrite (2, LOW);
  //connecting to a mqtt broker
  client.setServer(mqtt_broker, mqtt_port);
  client.setCallback(callback);
@@ -141,28 +143,27 @@ void setup() {
          delay(2000);
      }
  }
+
  // publish and subscribe
  //client.publish(topic, "Hi EMQX I'm ESP32 ^^");     //
  //client.subscribe(topic);     //allow to subcribe to a topic, not the case here we are using deep sleep
  
- 
- 
  dht.begin();
+ digitalWrite (DHT_SUPPLY, HIGH);
  read_dht();                           // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
- delay(10000);                         // time added after dht reading
+ delay(1000);                         // time added after dht reading 
  Serial.print(client.state());
  Serial.end();
  client.disconnect();
  WiFi.disconnect();
- delay(5000);                          // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
+ digitalWrite (DHT_SUPPLY, LOW);       // Turn off dht22
  esp_deep_sleep(DEEP_SLEEP_TIME * 1000000);   
 }
 
 
-
-void loop() {
+void loop() 
+{
 //client.loop();
-
 }
 
 
