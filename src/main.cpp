@@ -21,7 +21,7 @@ using namespace std;
 DHT dht(DHTPIN, DHTTYPE);
 
 // Deep Sleep Time
-#define DEEP_SLEEP_TIME 1800  //Deep sleep time [Seconds]
+long DEEP_SLEEP_TIME_SEC = 600;  //Deep sleep time [Seconds]
 
 // WiFi
 const char *ssid = "Marcano"; // Enter your WiFi name
@@ -150,19 +150,18 @@ void setup() {
  
  dht.begin();
  digitalWrite (DHT_SUPPLY, HIGH);
- read_dht();                           // I have added this delay so ESP32 can enter sleep mode. Otherwise it just reboot.
- delay(50);                           // time added after dht reading, if uart is not empty it will not enter deep sleep mode 
+ read_dht();                          // Call read_dht function.
+ delay(50);                           // time added after dht reading, to complete uart comunication. 
  Serial.print(client.state());
  Serial.end();
  client.disconnect();
  WiFi.disconnect();
  digitalWrite (DHT_SUPPLY, LOW);       // Turn off dht22
  digitalWrite (2, HIGH);;
- delay(50);
- digitalWrite (2, LOW);
- esp_deep_sleep(DEEP_SLEEP_TIME * 1000000);   
+ delay(50);                            // time added before deep sleep, to complete uart comunication and led blink.
+ digitalWrite (2, LOW);               
+ esp_deep_sleep(1000000ULL * DEEP_SLEEP_TIME_SEC);   
 }
-
 
 void loop() 
 {
